@@ -10,7 +10,7 @@ public class main
     public static void main(String[] args)
     {
         JFrame frame = new JFrame("Simon");
-        frame.setSize(400, 450);
+        frame.setSize(400, 500);
         JPanel pane = new JPanel();
         frame.setContentPane(pane);
         pane.setLayout(null);
@@ -30,12 +30,12 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
     Timer timer = new Timer(45, this);
     int speed = 0;
     
-    boolean weh = true;
+    boolean extendSequence = true;
     int score = 0;
     int turn = 0;//turn 0 show answers turn 1 player picks turn 2 lose
     
-    int idk = 0;
-    int idkagain = 0;
+    int highlightTimer = 0;
+    int bufferTimer = 0;
     
     int selected = 0;
     int[] answer = new int[0];
@@ -63,10 +63,9 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
                     audio = AudioSystem.getAudioInputStream(this.getClass().getResource("C2.wav"));
                     break;
                 default:
-                    audio = null;//AudioSystem.getAudioInputStream(this.getClass().getResource("C.wav"));
+                    audio = null;
                     break;
             }
-            //AudioInputStream audio = AudioSystem.getAudioInputStream(this.getClass().getResource("/Users/stephenchi/Documents/Programming/Java/Zombie boom boom/hilary duff - wake up.mp3"));
             Clip clip = AudioSystem.getClip();
             clip.open(audio);
             clip.start();
@@ -82,11 +81,11 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
         super.paintComponent(g);
         timer.start();
         
-        if (weh)
+        if (extendSequence)
         {
             answer = Arrays.copyOf(answer, answer.length + 1);
             answer[answer.length - 1] = random(0, 3);
-            weh = false;
+            extendSequence = false;
         }
         
         //simon board
@@ -104,7 +103,7 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
             g.drawRect((i % 2) * 200, (i / 2) * 200, 200, 200);
         }
         
-        if (turn == 0 && idk < 19 - speed * 8 && idkagain > 30 - speed * 8)//selected tile
+        if (turn == 0 && highlightTimer < 19 - speed * 8 && bufferTimer > 30 - speed * 8)//selected tile
         {
             g.setColor(Color.white);
             g.fillRect((answer[selected] % 2) * 102 + 99, (answer[selected] / 2) * 102 + 99, 100, 100);
@@ -112,7 +111,7 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
         
         //indicates turn
         Color color;
-        if (turn == 0 && idkagain > 30 - speed * 8)
+        if (turn == 0 && bufferTimer > 30 - speed * 8)
         {
             color = new Color(255, 200, 200);
         }
@@ -154,19 +153,19 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
     public void actionPerformed(ActionEvent e)
     {
         //show answer
-        idkagain++;//so sound from turn 1 dont overlap
-        if (turn == 0 && idkagain > 30 - speed * 8)
+        bufferTimer++;//so sound from turn 1 doesn't overlap
+        if (turn == 0 && bufferTimer > 30 - speed * 8)
         {
             //sound
-            if (idk == 0)
+            if (highlightTimer == 0)
             {
                 playAudio(answer[selected]);
             }
             //flash
-            idk++;
-            if (idk == 20 - speed * 8)//3 frames of no white
+            highlightTimer++;
+            if (highlightTimer == 20 - speed * 8)//3 frames of no white
             {
-                idk = 0;
+                highlightTimer = 0;
                 selected++;
             }
             //if all answers shown
@@ -190,11 +189,11 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
                 select = 0;
                 selected = 0;
                 int speed = 0;
-                weh = true;
+                extendSequence = true;
                 score = 0;
                 turn = 0;
-                idk = 0;
-                idkagain = 0;
+                highlightTimer = 0;
+                bufferTimer = 0;
                 answer = new int[0];
                 int select = 0;
             }
@@ -236,8 +235,8 @@ class MyCanvas extends JPanel implements MouseListener, ActionListener
                         score++;
                         turn = 0;
                         select = 0;
-                        weh = true;
-                        idkagain = 0;
+                        extendSequence = true;
+                        bufferTimer = 0;
                     }
                 }
             }
